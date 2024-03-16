@@ -1,0 +1,120 @@
+name: 'Delivery da Infraestrutura'
+
+on:
+  push:
+    branches:
+      - "main"
+      - "development"
+      - "release"
+
+permissions:
+  contents: read
+
+jobs:
+  terraform-dev:
+    name: 'Infraestrutura - Terraform - Dev'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    if: github.ref == 'refs/heads/development'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Instala o Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Configura as credenciais da AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Inicializa o terraform
+      run: terraform init
+
+    - name: Seleciona a Workspace
+      run: terraform workspace select --or-create dev
+
+    - name: Executa o plano do Terraform
+      run:  terraform plan -var-file=environment/dev/variables.tfvars
+
+    - name: Aplica o Terraform
+      run: terraform apply -var-file=environment/dev/variables.tfvars --auto-approve
+
+  terraform-qa:
+    name: 'Infraestrutura - Terraform - QA'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    if: github.ref == 'refs/heads/release'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Instala o Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Configura as credenciais da AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Inicializa o terraform
+      run: terraform init
+
+    - name: Seleciona a Workspace
+      run: terraform workspace select --or-create qa
+
+    - name: Executa o plano do Terraform
+      run:  terraform plan -var-file=environment/qa/variables.tfvars
+
+    - name: Aplica o Terraform
+      run: terraform apply -var-file=environment/qa/variables.tfvars --auto-approve
+
+  terraform-prod:
+    name: 'Infraestrutura - Terraform - PROD'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Instala o Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Configura as credenciais da AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Inicializa o terraform
+      run: terraform init
+
+    - name: Seleciona a Workspace
+      run: terraform workspace select --or-create prod
+
+    - name: Executa o plano do Terraform
+      run:  terraform plan -var-file=environment/prod/variables.tfvars
+
+    - name: Aplica o Terraform
+      run: terraform apply -var-file=environment/prod/variables.tfvars --auto-approve
