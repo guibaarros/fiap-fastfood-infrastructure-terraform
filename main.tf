@@ -3,3 +3,9 @@ module "eks" {
     
     env = var.env
 }
+
+module "secret_manager" {
+    source = "./modules/secret-manager"
+  
+    env = var.env
+}
