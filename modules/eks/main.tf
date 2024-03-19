@@ -17,8 +17,8 @@ resource "aws_eks_node_group" "eks_cluster_fiap_fastfood_node_group" {
   subnet_ids      = aws_eks_cluster.eks_cluster_fiap_fastfood.vpc_config[0].subnet_ids
   instance_types  = ["t3.medium"]
   scaling_config {
-    desired_size = 1
-    max_size     = 2
+    desired_size = 2
+    max_size     = 4
     min_size     = 1
   }
   depends_on = [aws_eks_cluster.eks_cluster_fiap_fastfood]
