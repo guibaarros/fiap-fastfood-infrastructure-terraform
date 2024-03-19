@@ -3,10 +3,9 @@ name: 'Delivery da Infraestrutura'
 on:
   push:
     branches:
-      # - "main"
-      # - "development"
-      # - "release"
-      - "feature"
+      - "main"
+      - "development"
+      - "release"
 
 permissions:
   contents: read
